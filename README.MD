@@ -1,6 +1,6 @@
-<center>
-<img src="/docs/vgring_logo.png" width="150" height="150">
-</center>
+<p align="center">
+   <img src="/docs/vgring_logo.png" width="150" height="150">
+</p>
 
 # 🔔 VGRING - Campainha Inteligente com ESP8266
 
