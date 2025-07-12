@@ -63,7 +63,7 @@ JsonDocument scanWifi() {
   return doc;
 }
 
-void startAcessPoint(){
+void startAccessPoint(){
   Serial.println("Modo AP: configuração de Wi-Fi");
   WiFi.disconnect();
   WiFi.mode(WIFI_AP);

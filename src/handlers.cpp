@@ -5,7 +5,7 @@
 #include "wifi_utils.h"
 #include "file_utils.h"
 #include "led.h"
-#include "Globals.h"
+#include "constants.h"
 #include "vgring_updater.h"
 
 extern ESP8266WebServer server;
@@ -117,35 +117,11 @@ void handleNotFound() {
   file.close();
 }
 
-void handleUpdateFirmware() {
-  server.sendHeader("Access-Control-Allow-Origin", "*");
-
-  JsonDocument body;
-  DeserializationError error = deserializeJson(body, server.arg("plain"));
-
-  if(error) {
-    server.send(400, F("application/json"), getJsonResponse(false, "Invalid JSON body"));
-    return;
-  }
-
-  const char* url = body["url"];
-
-  if (!url || strlen(url) == 0) {
-    server.send(400, F("application/json"), getJsonResponse(false, "Missing URL"));
-    return;
-  }
-  
-  updateFirmware(url);
-
-  server.send(200, F("application/json"), getJsonResponse(true, "Update started"));
-}
-
 void registerHandlers(ESP8266WebServer& s) {
   s.on("/api/scan_wifi", HTTP_GET, handleScanWifi);
   s.on("/api/connect", HTTP_POST, handleConnect);
   s.on("/api/get_config", HTTP_GET, handleGetConfig);
   s.on("/api/sign", HTTP_POST, handleSign);
-  s.on("/api/update_firmware", HTTP_POST, handleUpdateFirmware);
   s.onNotFound(handleNotFound);
 }
 

@@ -4,7 +4,7 @@
 
 # 🔔 VGRING - Campainha Inteligente com ESP8266
 
-VGRING é um projeto de campainha inteligente baseado em ESP8266 com painel de configuração via Wi-Fi, suporte a OTA (atualização remota) e integração com um servidor web seguro.
+VGRING é um projeto de campainha inteligente baseado em ESP8266 com painel de configuração via Wi-Fi.
 
 
 <img src="/docs/esp8266_project.jpg" width="400" height="250">
@@ -80,6 +80,5 @@ pio test
 | POST   | `/api/connect`     | Envia SSID e senha para conectar      |
 | POST   | `/api/sign`        | Salva token do FCM para envio de notificações           |
 | GET    | `/api/get_config`  | Retorna SSID, token e versão firmware |
-| POST   | `/api/update_firmware`      | Inicia atualização OTA                |
 
 ---

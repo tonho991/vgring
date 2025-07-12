@@ -6,7 +6,8 @@
 #include "wifi_utils.h"
 #include "file_utils.h"
 #include "handlers.h"
-#include "Globals.h"
+#include "constants.h"
+#include "vgring_updater.h"
 
 ESP8266WebServer server(80);
 
@@ -36,8 +37,12 @@ void setup() {
 
     String ssid, pass;
     if(!(loadCredentials(ssid, pass) && wifiConnect(ssid, pass))) {
-        startAcessPoint();
+        startAccessPoint();
         blinkLED(PIN_LED_RED, 200, 4);
+    } else {
+        if(isAuth()){
+            checkUpdate();
+        }
     }
 }
 
