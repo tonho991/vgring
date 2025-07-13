@@ -38,7 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate update_info.json
+      - name: Generate Update Info
         id: generate_json
         run: |
           VERSION=${GITHUB_REF##*/}
