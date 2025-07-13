@@ -9,26 +9,48 @@
 #include "handlers.h"
 #include "constants.h"
 
-bool isDowngrade(const char* newVersion, const char* currentVersion) {
-    String newVer = String(newVersion);
-    String currVer = String(currentVersion);
-
-    int newMajor, newMinor, newPatch;
-    int currMajor, currMinor, currPatch;
-
-    sscanf(newVer.c_str(), "v%d.%d.%d", &newMajor, &newMinor, &newPatch);
-    sscanf(currVer.c_str(), "v%d.%d.%d", &currMajor, &currMinor, &currPatch);
-
-    if (newMajor < currMajor) return true;
-    if (newMajor > currMajor) return false;
-
-    if (newMinor < currMinor) return true;
-    if (newMinor > currMinor) return false;
-
-    if (newPatch < currPatch) return true;
-    return false;
+int parseVersionPart(const String& s) {
+  int major = 0, minor = 0, patch = 0;
+  sscanf(s.c_str(), "%d.%d.%d", &major, &minor, &patch);
+  return major * 10000 + minor * 100 + patch;
 }
 
+
+int compareVersions(String v1, String v2) {
+  v1.replace("v", "");
+  v2.replace("v", "");
+
+  String v1Core = v1;
+  String v2Core = v2;
+
+  if (v1.indexOf("-") != -1) v1Core = v1.substring(0, v1.indexOf("-"));
+  if (v2.indexOf("-") != -1) v2Core = v2.substring(0, v2.indexOf("-"));
+
+  int n1 = parseVersionPart(v1Core);
+  int n2 = parseVersionPart(v2Core);
+
+  if (n1 > n2) return 1;
+  if (n1 < n2) return -1;
+
+  bool v1Pre = v1.indexOf("-") != -1;
+  bool v2Pre = v2.indexOf("-") != -1;
+
+  if (v1Pre && !v2Pre) return -1;
+  if (!v1Pre && v2Pre) return 1;
+
+  return 0;
+}
+
+bool isDowngrade(const char* newVersion, const char* currentVersion) {
+  return compareVersions(String(newVersion), String(currentVersion)) < 0;
+}
+
+/*
+* @brief Execute OTA process via bin URL
+*
+* @param url BIN URL to update
+*
+*/
 void updateFirmware(const char* url) {
     if (strncmp(url, VGRING_FIRM_BIN_URL, strlen(VGRING_FIRM_BIN_URL)) != 0) return;
 
@@ -70,6 +92,12 @@ void updateFirmware(const char* url) {
     }
 }
 
+/*
+* @brief Check if has update available
+*
+* @return return true or false if has an update
+*/
+
 bool checkUpdate(){
     if(WiFi.status() != WL_CONNECTED) return false;
 
@@ -98,12 +126,12 @@ bool checkUpdate(){
         return false;
     }
 
-    if (!json.containsKey("update_url") || !json["update_url"].is<const char*>()) {
+    if (!json["update_url"].is<const char*>()) {
         Serial.println("'update_url' is null or invalid");
         return false;
     }
 
-    if (!json.containsKey("version") || !json["version"].is<const char*>()) {
+    if (!json["version"].is<const char*>()) {
         Serial.println("'version' is null or invalid");
         return false;
     }
@@ -111,11 +139,20 @@ bool checkUpdate(){
     const char* updateUrl = json["update_url"];
     const char* nVersion = json["version"];
 
+    if(String(nVersion) == String(VGRING_FIRM_VERSION)){
+        Serial.println("No updates availables");
+        blinkLED(PIN_LED_GREEN, 200, 1);
+        return false;
+    }
+
     // OBS: -f flag is to force downgrade (Ex.: v1.0.0-f)
     if(isDowngrade(nVersion, VGRING_FIRM_VERSION) && !String(nVersion).endsWith("-f")) {
         Serial.println("Downgrade is not accepted");
         return false;
     }
+
+        Serial.println("New version found: " + String(VGRING_FIRM_VERSION) + " > " + String(nVersion));
+
 
     updateFirmware(updateUrl);
 

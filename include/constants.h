@@ -1,16 +1,19 @@
-#ifndef GLOBALS_H
-#define GLOBALS_H
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
 
+// ====== Pins ======
+extern const int PIN_LED_RED;
+extern const int PIN_LED_GREEN;
+extern const int PIN_BTN_RING;
+extern const int PIN_BTN_RESET;
+
+// ====== Firmware ======
+extern const char* const VGRING_FIRM_VERSION;
+extern const char* const VGRING_API_URL;
+extern const char* const VGRING_FIRM_BIN_URL;
+extern const char* const VGRING_UPDATE_INFO;
+
+// ====== States ======
 extern bool IS_UPDATING;
-
-extern char* VGRING_FIRM_VERSION;
-extern char* VGRING_FIRM_BIN_URL;
-extern char* VGRING_UPDATE_INFO;
-extern char* VGRING_API_URL;
-
-extern int PIN_LED_RED;
-extern int PIN_LED_GREEN;
-extern int PIN_BTN_RING;
-extern int PIN_BTN_RESET;
 
 #endif
