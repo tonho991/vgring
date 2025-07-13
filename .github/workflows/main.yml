@@ -42,15 +42,18 @@ jobs:
         id: generate_json
         run: |
           VERSION=${GITHUB_REF##*/}
-          BIN_FILENAME=$(basename "${{ steps.get_bin.outputs.BIN_PATH }}")
-          DOWNLOAD_URL="https://github.com/${{ github.repository }}/releases/download/${VERSION}/${BIN_FILENAME}"
+          BIN_FILENAME=$(basename "$BIN")
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${VERSION}/${BIN_FILENAME}"
 
-          cat > update_info.json <<EOF
-          {
-            "version": "${VERSION}",
-            "update_url": "${DOWNLOAD_URL}"
-          }
-          EOF
+          cat > update_info.json <<EOF{
+                                       "version": "${VERSION}",
+                                       "update_url": "${DOWNLOAD_URL}"
+                                     }EOF
+                                     
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
 
       - name: Commit update_info.json
         uses: EndBug/add-and-commit@v9
@@ -58,3 +61,5 @@ jobs:
           add: 'update_info.json'
           message: 'build: atualiza arquivo de versão para ${{ github.ref_name }}'
           push: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
