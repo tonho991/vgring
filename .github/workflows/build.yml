@@ -1,0 +1,61 @@
+name: Build & Release VGRING
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout 
+        uses: actions/checkout@v4
+
+      - name: Install PlatformIO
+        run: |
+          python -m pip install --upgrade pip
+          pip install platformio
+
+      - name: Compile
+        run: pio run
+
+      - name: BIN Search
+        id: get_bin
+        run: |
+          BIN_PATH=$(find .pio/build -name "*.bin" | head -n 1)
+          echo "BIN=$BIN_PATH" >> $GITHUB_ENV
+          echo "BIN_PATH=$BIN_PATH" >> $GITHUB_OUTPUT
+
+      - name: Release creation
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.BIN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate update_info.json
+        id: generate_json
+        run: |
+          VERSION=${GITHUB_REF##*/}
+          BIN_FILENAME=$(basename "$BIN")
+          DOWNLOAD_URL="https://github.com/${GITHUB_REPOSITORY}/releases/download/${VERSION}/${BIN_FILENAME}"
+          cat > update_info.json <<EOF {"version": "${VERSION}","update_url": "${DOWNLOAD_URL}"} EOF
+
+      - name: Configure git user
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Commit update_info.json
+        uses: EndBug/add-and-commit@v9
+        with:
+          add: 'update_info.json'
+          message: 'build: atualiza arquivo de versão para ${{ github.ref_name }}'
+          push: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
